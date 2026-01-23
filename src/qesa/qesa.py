@@ -28,15 +28,7 @@ class QeSA(QeMCMC, ClassicalMCMC):
     proposal methods with classical simulated annealing. It inherits from both QeMCMC
     and ClassicalMCMC to leverage quantum and classical proposal mechanisms.
     
-    Attributes:
-        model: The energy model to optimize over
-        n_spins: Number of spins/qubits in the system
-        update: The proposal function (set based on proposal method)
         
-    Supported proposal methods:
-        - 'local': Classical local moves (single spin flips)
-        - 'uniform': Classical uniform random proposals
-        - 'qemcmc': Quantum enhanced MCMC proposals
     """
     
     def __init__(
