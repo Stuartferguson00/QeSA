@@ -1,6 +1,8 @@
 README.md
 pyproject.toml
 src/QeSA/qesa.py
+src/qesa/qesa.py
+src/qesa/utils.py
 src/qesa.egg-info/PKG-INFO
 src/qesa.egg-info/SOURCES.txt
 src/qesa.egg-info/dependency_links.txt

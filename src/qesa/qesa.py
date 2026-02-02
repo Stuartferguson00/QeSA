@@ -9,11 +9,13 @@ Author: Stuart Ferguson
 Date: 2025
 Dependencies: qemcmc 0.3.31
 """
-from qemcmc.energy_models import EnergyModel
-from qemcmc.QeMCMC_ import QeMCMC
-from qemcmc.ClassicalMCMC import ClassicalMCMC
-from qemcmc.helpers import get_random_state
-from qemcmc.helpers import MCMCState, MCMCChain
+import qemcmc as qemcmc
+qemcmc.__version__
+from qemcmc.model.energy_model import EnergyModel
+from qemcmc.sampler.qe_mcmc import QeMCMC
+from qemcmc.sampler.classical_mcmc import ClassicalMCMC
+from qemcmc.utils.helpers import get_random_state
+from qemcmc.utils.helpers import MCMCState, MCMCChain
 import typing
 import numpy as np
 from tqdm import tqdm
@@ -161,14 +163,11 @@ class QeSA(QeMCMC, ClassicalMCMC):
         # Fixed iteration loop with progress bar
         for i in tqdm(range(0, n_hops), desc='running simulated annealing steps...', disable=not verbose):
             
-            
             # Generate new proposed state
             s_prime = self.update(current_state.bitstring)
-            
-            
+
             # Calculate energy of proposed state
             energy_sprime = self.model.get_energy(s_prime)
-            
             
             # Get temperature from predefined schedule
             temp = temp_scaling[i]
