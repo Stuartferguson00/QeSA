@@ -83,10 +83,9 @@ class QeSA(QeMCMC, ClassicalMCMC):
             # Initialize quantum MCMC parent class
             super().__init__(model, gamma, time, np.nan, delta_time)
             # Set the update function to use quantum proposals
-            self.update = self.get_s_prime
+            #self.update = self.get_s_prime
         else:
             raise ValueError(f"Invalid proposal method: {proposal}. Choose from 'local', 'uniform', 'qemcmc'")
-
         
     
     
@@ -162,7 +161,6 @@ class QeSA(QeMCMC, ClassicalMCMC):
         
         # Fixed iteration loop with progress bar
         for i in tqdm(range(0, n_hops), desc='running simulated annealing steps...', disable=not verbose):
-            
             # Generate new proposed state
             s_prime = self.update(current_state.bitstring)
 
@@ -190,3 +188,4 @@ class QeSA(QeMCMC, ClassicalMCMC):
         # Return collected samples
         return mcmc_chain
     
+

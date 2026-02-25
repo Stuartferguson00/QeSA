@@ -63,7 +63,7 @@ class Classical_Solver:
         n_spins = model.n_spins
         
         if n_spins > 20:
-            raise ValueError("Brute force method is not feasible for n_spins > 20 due to combinatorial explosion.")
+            raise ValueError("Brute force method is not feasible for n_spins > 20.")
         all_energies = model.get_all_energies()
         min_energy_arg = np.argmin(all_energies)
         ground_state_bitstring = model.S[min_energy_arg]

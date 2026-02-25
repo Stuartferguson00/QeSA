@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "cmake>=4.2.1",
     "gurobipy>=13.0.1",
-    "pennylane>=0.44.0",
+    "pennylane==0.44",
     "qemcmc",
 ]
 

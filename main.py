@@ -1,6 +1,5 @@
 
 # Add the parent directory to the path so we can import from qoptimizer
-from turtle import color
 import os, sys, warnings
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from qesa.qesa import QeSA
@@ -10,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-from tqdm import trange
 from joblib import Parallel, delayed
 from tqdm import tqdm
 import time
@@ -21,9 +19,9 @@ if __name__ == "__main__":
 
 
 
-    n_spin = 7
-    proposal = "qemcmc"
-    repetitions = 20
+    n_spin = 5
+    repetitions = 10
+    classical_repetitions = repetitions *10
     n_hops = 100
     
     gamma = (0.25,0.6)
@@ -32,13 +30,11 @@ if __name__ == "__main__":
     quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': 0.8}
     
 
-    if proposal == "qemcmc":
-        gamma = (0.25,0.6)
-        time_ = (2,20)
-        delta_time = 0.8
-        quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': delta_time}
-    else:
-        quantum_args_dict = None
+    gamma = (0.25,0.6)
+    time_ = (2,20)
+    delta_time = 0.8
+    quantum_args_dict = {'gamma': (0.25, 0.6), 'time': (2, 20), 'delta_time': delta_time}
+
 
 
 
@@ -73,7 +69,7 @@ if __name__ == "__main__":
     # )
     q_results = []
     for _ in tqdm(range(repetitions)):
-        q_results.append(run_single_repetition(model, proposal, quantum_args_dict, n_hops, temps))
+        q_results.append(run_single_repetition(model, "qemcmc", quantum_args_dict, n_hops, temps))
 
 
     # Unpack the results back into your lists
@@ -90,11 +86,11 @@ if __name__ == "__main__":
 
     # c_results = Parallel(n_jobs=-1)(
     #     delayed(run_single_repetition)(model, "local", None, n_hops, temps) 
-    #     for _ in tqdm(range(repetitions*10))
+    #     for _ in tqdm(range(classical_repetitions))
     # )
 
     c_results = []
-    for _ in tqdm(range(repetitions+10)):
+    for _ in tqdm(range(classical_repetitions)):
         c_results.append(run_single_repetition(model, "local", None, n_hops, temps))
 
     # Unpack the results back into your lists
@@ -114,7 +110,7 @@ if __name__ == "__main__":
         plt.plot(np.arange(0,n_hops+1), q_all_energies_found[i], alpha=0.03, color=q_color)
     plt.xlabel('Hop Number')
     plt.ylabel('Energy')
-    plt.title('Average Energy vs Hop Number | proposal: {}'.format(proposal))
+    plt.title('Average Energy vs Hop Number')
     plt.axhline(y=model_lowest, color='r', linestyle='--', label='Exact optimal')
     plt.legend()
     plt.show()
@@ -122,7 +118,9 @@ if __name__ == "__main__":
 
 
     print("percentage of quantum runs that found the ground state:", np.sum(np.isclose(q_min_energies_found, model_lowest)/repetitions*100))
-    print("percentage of classical runs that found the ground state:", np.sum(np.isclose(q_min_energies_found, model_lowest)/(repetitions+10)*100))
+    print("percentage of quantum runs that finished in the ground state:", np.sum(np.isclose(q_optimal_energies_found, model_lowest)/repetitions*100))
+    print("percentage of classical runs that found the ground state:", np.sum(np.isclose(c_min_energies_found, model_lowest)/(classical_repetitions)*100))
+    print("percentage of classical runs that finished in the ground state:", np.sum(np.isclose(c_optimal_energies_found, model_lowest)/(classical_repetitions)*100))
 
     # plot bar graph of results
     plt.figure(figsize=(8, 6))
@@ -131,7 +129,7 @@ if __name__ == "__main__":
     plt.axvline(x=model_lowest, color='red', linestyle='--', label='Exact optimal')    
     plt.xlabel('Energy found')
     plt.ylabel('Counts')
-    plt.title('Optimal Energies Found by SA | proposal: {}'.format(proposal))
+    plt.title('Optimal Energies Found by SA')
     plt.legend()
     plt.show()  
 
