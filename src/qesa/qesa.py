@@ -10,19 +10,19 @@ Date: 2025
 Dependencies: qemcmc 0.3.31
 """
 import qemcmc as qemcmc
-qemcmc.__version__
 from qemcmc.model.energy_model import EnergyModel
-from qemcmc.sampler.qe_mcmc import QeMCMC
-from qemcmc.sampler.classical_mcmc import ClassicalMCMC
+from qemcmc.sampler import proposal
+from qemcmc.sampler.runners import MCMCRunner
 from qemcmc.utils.helpers import get_random_state
 from qemcmc.utils.helpers import MCMCState, MCMCChain
+
 import typing
 import numpy as np
 from tqdm import tqdm
 from typing import Dict, Optional
 
 
-class QeSA(QeMCMC, ClassicalMCMC):
+class QeSA(MCMCRunner):
     """
     Quantum Enhanced Simulated Annealing (QeSA) class.
     
@@ -36,56 +36,22 @@ class QeSA(QeMCMC, ClassicalMCMC):
     def __init__(
         self,
         model: EnergyModel,
-        proposal: str,
-        quantum_args_dict: Optional[Dict[str, typing.Any]] = None
+        proposal: proposal,
     ) -> None:
         """
         Initialize the QeSA optimizer.
         
         Args:
             model: The energy model/Hamiltonian to optimize. Must have a get_energy() method.
-            proposal (str): The proposal method to use. Options:
-                - 'local': Classical local moves (single spin flips)
-                - 'uniform': Classical uniform random proposals  
-                - 'qemcmc': Quantum enhanced MCMC proposals
-            quantum_args_dict (Dict, optional): Dictionary containing quantum parameters.
-                Required for 'qemcmc' proposal:
-                - 'gamma': Quantum parameter controlling proposal distribution
-                - 'time': Evolution time for quantum proposals
-                - 'delta_time': Time step (optional, defaults to 0.8)
-                
+            proposal (proposal): The proposal to use.
         Raises:
             ValueError: If proposal method is invalid or required quantum args are missing
             KeyError: If required quantum arguments are not provided for qemcmc
         """
-        # Store the proposal method for reference
-        self.proposal_method = proposal
+        super().__init__(model, np.nan)
+        self.proposal = proposal
         
-        # Initialize based on proposal method
-        if proposal == "local":
-            # Classical local moves - initialize with classical MCMC
-            ClassicalMCMC.__init__(self, model, np.nan, proposal)
-        elif proposal == "uniform":
-            # Classical uniform random proposals
-            ClassicalMCMC.__init__(self, model, np.nan, proposal)
-        elif proposal == "qemcmc":
-            # Quantum enhanced proposals - need quantum parameters
-            if quantum_args_dict is None:
-                raise ValueError("quantum_args_dict is required for qemcmc proposal method")
-            
-            try:
-                gamma = quantum_args_dict['gamma']
-                time = quantum_args_dict['time']
-                delta_time = quantum_args_dict.get('delta_time', 0.8)  # Default to 0.8 if not provided
-            except KeyError as e:
-                raise ValueError(f"Missing required quantum argument: {e}")
-            
-            # Initialize quantum MCMC parent class
-            super().__init__(model, gamma, time, np.nan, delta_time)
-            # Set the update function to use quantum proposals
-            #self.update = self.get_s_prime
-        else:
-            raise ValueError(f"Invalid proposal method: {proposal}. Choose from 'local', 'uniform', 'qemcmc'")
+        
         
     
     
@@ -132,9 +98,9 @@ class QeSA(QeMCMC, ClassicalMCMC):
         
         # Handle initial state - generate random if not provided or invalid
         if len(initial_state) == 0:
-            initial_state = MCMCState(get_random_state(self.n_spins), accepted=True)
-        elif len(initial_state) != self.n_spins:
-            initial_state = MCMCState(get_random_state(self.n_spins), accepted=True)
+            initial_state = MCMCState(get_random_state(self.model.n_spins), accepted=True)
+        elif len(initial_state) != self.model.n_spins:
+            initial_state = MCMCState(get_random_state(self.model.n_spins), accepted=True)
         else:
             initial_state = MCMCState(initial_state, accepted=True)
         
@@ -161,26 +127,20 @@ class QeSA(QeMCMC, ClassicalMCMC):
         
         # Fixed iteration loop with progress bar
         for i in tqdm(range(0, n_hops), desc='running simulated annealing steps...', disable=not verbose):
-            # Generate new proposed state
-            s_prime = self.update(current_state.bitstring)
-
-            # Calculate energy of proposed state
-            energy_sprime = self.model.get_energy(s_prime)
-            
             # Get temperature from predefined schedule
             temp = temp_scaling[i]
                         
-            # Metropolis-Hastings acceptance test with scheduled temperature
-            accepted = self.test_accept(energy_s, energy_sprime, temperature=temp)
-                        
-            # Update current state if proposal was accepted
+            s_prime = self.proposal.update(current_state.bitstring)
+            energy_sprime = self.model.get_energy(s_prime)
+            accepted = self.is_accepted(energy_s, energy_sprime, temperature=temp)
+
             if accepted:
-                current_state = MCMCState(s_prime, accepted, energy_sprime, position=i)
-                energy_s = energy_sprime 
-            
-            # Sample state at specified frequency (skip initial state i=0)
-            if i // sample_frequency == i / sample_frequency and i != 0:
-                mcmc_chain.add_state(current_state)
+                energy_s = energy_sprime
+                current_state = MCMCState(s_prime, accepted, energy_s, position=i)
+
+            if i % sample_frequency == 0 and i != 0:
+                mcmc_chain.add_state(MCMCState(current_state.bitstring, True, energy_s, position=i))
+
         
         # Always add the final state to the chain
         mcmc_chain.add_state(current_state)

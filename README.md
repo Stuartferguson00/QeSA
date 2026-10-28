@@ -4,7 +4,7 @@
 [![Qiskit 2.2](https://img.shields.io/badge/Qiskit-2.2-blueviolet)](https://quantum.cloud.ibm.com/docs/en/api/qiskit/release-notes/2.2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This library provides a simple implementation of Quantum-enhanced Simulated Annealing (QeSA), as introduced in a recent Arxiv paper. The QeMCMC subroutines are abstracted to a seperate repo, [QeMCMC](https://github.com/Stuartferguson00/QeMCMC) See also the related method [Quantum-enhanced Parallel Tempering (QePT)](https://github.com/Stuartferguson00/QePT).
+This library provides a simple implementation of Quantum-enhanced Simulated Annealing (QeSA), as introduced in a recent Arxiv paper. The QeMCMC subroutines are abstracted to a seperate repo, [QeMCMC](https://github.com/Stuartferguson00/QeMCMC) See also the related method [Quantum-enhanced Parallel Tempering (QePT)](https://github.com/Stuartferguson00/QePT). This code was written for qemcmc v0.6.0 - future releases may be breaking.
 
 
 ## Installation
@@ -38,10 +38,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 This project was created by Stuart Ferguson with contributions from Feroz Hassan.
 
-For questions, suggestions, or collaboration, please feel free to contact the authors:
+For questions, suggestions, or collaboration, please feel free to contact the main author:
 
 -   S.A.Ferguson-3@sms.ed.ac.uk.
--   F.M.Hassan@sms.ed.ac.uk
 
  ## Acknowledgements
 

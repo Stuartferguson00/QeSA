@@ -7,7 +7,7 @@ Description-Content-Type: text/markdown
 Requires-Dist: cmake>=4.2.1
 Requires-Dist: gurobipy>=13.0.1
 Requires-Dist: pennylane==0.44
-Requires-Dist: qemcmc
+Requires-Dist: qemcmc==0.6.0
 
 # Quantum-enhanced Simulated annealing Simulator
 
