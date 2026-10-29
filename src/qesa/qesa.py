@@ -6,8 +6,8 @@ that combines quantum MCMC proposals with classical simulated annealing optimiza
 The algorithm supports multiple proposal methods and temperature scheduling schemes.
 
 Author: Stuart Ferguson
-Date: 2025
-Dependencies: qemcmc 0.3.31
+Date: 2026
+Dependencies: qemcmc 0.6.0
 """
 import qemcmc as qemcmc
 from qemcmc.model.energy_model import EnergyModel
@@ -15,11 +15,8 @@ from qemcmc.sampler import proposal
 from qemcmc.sampler.runners import MCMCRunner
 from qemcmc.utils.helpers import get_random_state
 from qemcmc.utils.helpers import MCMCState, MCMCChain
-
-import typing
 import numpy as np
 from tqdm import tqdm
-from typing import Dict, Optional
 
 
 class QeSA(MCMCRunner):
@@ -42,11 +39,9 @@ class QeSA(MCMCRunner):
         Initialize the QeSA optimizer.
         
         Args:
-            model: The energy model/Hamiltonian to optimize. Must have a get_energy() method.
-            proposal (proposal): The proposal to use.
-        Raises:
-            ValueError: If proposal method is invalid or required quantum args are missing
-            KeyError: If required quantum arguments are not provided for qemcmc
+            model: The energy model/Hamiltonian to optimize.
+            proposal (proposal): The qemcmc.proposal object to use.
+
         """
         super().__init__(model, np.nan)
         self.proposal = proposal
